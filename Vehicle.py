@@ -4,12 +4,14 @@ class Vehicle:
                  pos_x,
                  pos_y,
                  speed,
+                 in_accident = False,
                  direction = 0):
 
         self.id         = id
         self.pos_x      = pos_x
         self.pos_y      = pos_y
         self.speed      = speed
+        self.in_accident= in_accident
         self.direction  = direction
         self.bufor      = []
 

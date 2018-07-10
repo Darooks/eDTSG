@@ -5,7 +5,7 @@ import random
 
 
 TIME_STEPS = sumo_upload('output.xml')
-EVENTS = {}  #  time: id
+EVENTS = {}  # time: id
 ACCIDENTAL_VEHICLE = []
 MAX_RANGE = 250  # range of communication
 NUMBER_OF_EVENTS = 10
@@ -30,13 +30,13 @@ def create_accidental_vehicle(vehicle):
     new_accidental_vehicle = Vehicle(vehicle.id,
                                      vehicle.pos_x,
                                      vehicle.pos_y,
-                                     0,
-                                     0)
+                                     speed=0,
+                                     in_accident=True)
 
     ACCIDENTAL_VEHICLE.append(new_accidental_vehicle)
 
 
-def self_accident_dissemination():
+def self_accident_dissemination(vehicles):
     """ Accidental nodes disseminate information about
     their accident to the vehicle that are in their domain and range"""
     pass
@@ -46,11 +46,10 @@ def simulate():
     for time_step in TIME_STEPS:
         vehicles = TIME_STEPS[time_step]
 
-        # TODO: 1) Check if there is new event and operate the events
         if time_step in EVENTS.keys():
             create_accidental_vehicle(vehicles[EVENTS[time_step]])
-
-        self_accident_dissemination()
+        # TODO: 1) Accidental nodes disseminate information
+        self_accident_dissemination(vehicles)
 
         for vehicle_id in vehicles:
             # TODO: 2) Send and collect the messages
