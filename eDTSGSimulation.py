@@ -37,6 +37,8 @@ def create_accidental_vehicle(vehicle):
 
 
 def self_accident_dissemination():
+    """ Accidental nodes disseminate information about
+    their accident to the vehicle that are in their domain and range"""
     pass
 
 
@@ -58,7 +60,6 @@ def simulate():
 def main():
     draw_random_events()
     simulate()
-    a = 6
 
 
 if __name__ == "__main__":
