@@ -4,8 +4,7 @@ class Vehicle:
                  pos_x,
                  pos_y,
                  speed,
-                 direction = 0,
-                 inAccident = False):
+                 direction = 0):
 
         self.id         = id
         self.pos_x      = pos_x
@@ -13,7 +12,6 @@ class Vehicle:
         self.speed      = speed
         self.direction  = direction
         self.bufor      = []
-        self.inAccident = inAccident
 
     # TODO: Phase's - for every single message in bufor
     # TODO: Calculate domain for every message in bufor
