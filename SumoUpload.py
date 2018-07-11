@@ -18,7 +18,12 @@ def sumo_upload(file):
 
         for vehicle in timeStep.findall('vehicle'):
             id = vehicle.attrib['id']
-            new_vehicle = Vehicle(id, vehicle.attrib['x'], vehicle.attrib['y'], vehicle.attrib['speed'])
+            new_vehicle = Vehicle(id,
+                                  vehicle.attrib['x'],
+                                  vehicle.attrib['y'],
+                                  vehicle.attrib['speed'],
+                                  in_accident=False,
+                                  angle=vehicle.attrib['angle'])
 
             VEHICLES[id] = new_vehicle
 

@@ -4,15 +4,15 @@ class Vehicle:
                  pos_x,
                  pos_y,
                  speed,
-                 in_accident = False,
-                 direction = 0):
+                 in_accident=False,
+                 angle=0):
 
         self.id         = id
         self.pos_x      = pos_x
         self.pos_y      = pos_y
         self.speed      = speed
         self.in_accident= in_accident
-        self.direction  = direction
+        self.angle  = angle
         self.bufor      = []
 
     # TODO: Phase's - for every single message in bufor

@@ -4,7 +4,7 @@ from Message import *
 import random
 
 
-TIME_STEPS = sumo_upload('output.xml')
+TIME_STEPS = sumo_upload('fcd_output.xml')
 EVENTS = {}  # time: id
 ACCIDENTAL_VEHICLE = []
 MAX_RANGE = 250  # range of communication
@@ -31,7 +31,8 @@ def create_accidental_vehicle(vehicle):
                                      vehicle.pos_x,
                                      vehicle.pos_y,
                                      speed=0,
-                                     in_accident=True)
+                                     in_accident=True,
+                                     angle=vehicle.angle)
 
     ACCIDENTAL_VEHICLE.append(new_accidental_vehicle)
 
