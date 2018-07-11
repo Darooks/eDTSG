@@ -2,13 +2,15 @@ from SumoUpload import *
 from Vehicle import *
 from Message import *
 import random
+from math import sqrt, pow
 
 
 TIME_STEPS = sumo_upload('fcd_output.xml')
 EVENTS = {}  # time: id
-ACCIDENTAL_VEHICLE = []
-MAX_RANGE = 250  # range of communication
+ACCIDENTAL_VEHICLES = []
+COMMUNICATION_RANGE = 250  # range of communication [m]
 NUMBER_OF_EVENTS = 10
+MESSAGES_LIFETIME = 10  # seconds
 
 
 def draw_random_events():
@@ -34,13 +36,30 @@ def create_accidental_vehicle(vehicle):
                                      in_accident=True,
                                      angle=vehicle.angle)
 
-    ACCIDENTAL_VEHICLE.append(new_accidental_vehicle)
+    ACCIDENTAL_VEHICLES.append(new_accidental_vehicle)
 
 
-def self_accident_dissemination(vehicles):
+def send_message(destination_vehicle, message):
+    message.update_sequence.append(destination_vehicle.id)
+    destination_vehicle.bufor[message.message_id] = message
+
+
+def accident_node_dissemination(vehicles, time_step):
     """ Accidental nodes disseminate information about
     their accident to the vehicle that are in their domain and range"""
-    pass
+    for accidental_vehicle in ACCIDENTAL_VEHICLES:
+        message = Message(message_id=accidental_vehicle.id,
+                          lifetime=MESSAGES_LIFETIME,
+                          event_time_stamp=time_step)
+
+        for source_vehicle in vehicles.values():
+            distance_between = sqrt(pow(accidental_vehicle.pos_x - source_vehicle.pos_x, 2) +
+                                    pow(accidental_vehicle.pos_y - source_vehicle.pos_y, 2))
+
+            if distance_between < COMMUNICATION_RANGE and message not in source_vehicle.bufor:
+                send_message(source_vehicle, message)
+                print("Sending message. \n\tSource id:", accidental_vehicle.id,
+                      "\n\tDestination id:", source_vehicle.id)
 
 
 def simulate():
@@ -50,7 +69,7 @@ def simulate():
         if time_step in EVENTS.keys():
             create_accidental_vehicle(vehicles[EVENTS[time_step]])
         # TODO: 1) Accidental nodes disseminate information
-        self_accident_dissemination(vehicles)
+        accident_node_dissemination(vehicles, time_step)
 
         for vehicle_id in vehicles:
             # TODO: 2) Send and collect the messages

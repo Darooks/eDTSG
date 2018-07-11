@@ -8,12 +8,18 @@ class Vehicle:
                  angle=0):
 
         self.id         = id
-        self.pos_x      = pos_x
-        self.pos_y      = pos_y
-        self.speed      = speed
+        self.pos_x      = float(pos_x)
+        self.pos_y      = float(pos_y)
+        self.speed      = float(speed)
         self.in_accident= in_accident
-        self.angle  = angle
-        self.bufor      = []
+        self.angle      = float(angle)
+        self.bufor      = {}
+
+    def check_if_message_is_in_bufor(self, message_id):
+        if message_id in self.bufor.keys():
+            return True
+        else:
+            return False
 
     # TODO: Phase's - for every single message in bufor
     # TODO: Calculate domain for every message in bufor
