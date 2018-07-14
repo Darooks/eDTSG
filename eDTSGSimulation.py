@@ -12,7 +12,7 @@ ACCIDENTAL_VEHICLES = []
 DOMAINS = {}
 
 COMMUNICATION_RANGE = 250  # range of communication [m]
-DOMAIN_RANGE = 2000  # range of domain [m]
+DOMAIN_RANGE = 1000  # range of domain [m]
 NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
 
@@ -42,6 +42,11 @@ def create_accidental_vehicle(vehicle):
                                      angle=vehicle.angle)
 
     ACCIDENTAL_VEHICLES.append(new_accidental_vehicle)
+
+    DOMAINS[new_accidental_vehicle.id] = Domain(vehicle.pos_x,
+                                                vehicle.pos_y,
+                                                vehicle.angle,
+                                                vehicle.lane)
 
 
 def send_message(destination_vehicle, message):
