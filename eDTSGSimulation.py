@@ -37,6 +37,7 @@ def create_accidental_vehicle(vehicle):
                                      vehicle.pos_x,
                                      vehicle.pos_y,
                                      speed=0,
+                                     lane=vehicle.lane,
                                      in_accident=True,
                                      angle=vehicle.angle)
 

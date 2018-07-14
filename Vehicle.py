@@ -4,6 +4,7 @@ class Vehicle:
                  pos_x,
                  pos_y,
                  speed,
+                 lane=None,
                  in_accident=False,
                  angle=0):
 
@@ -11,6 +12,7 @@ class Vehicle:
         self.pos_x      = float(pos_x)
         self.pos_y      = float(pos_y)
         self.speed      = float(speed)
+        self.lane       = lane
         self.in_accident= in_accident
         self.angle      = float(angle)
         self.bufor      = {}
