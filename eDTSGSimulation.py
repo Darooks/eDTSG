@@ -1,30 +1,34 @@
 from SumoUpload import *
 from Vehicle import *
 from Message import *
+from Domain import *
+from Utils import *
 import random
-from math import sqrt, pow
 
 
 TIME_STEPS = sumo_upload('fcd_output.xml')
 EVENTS = {}  # time: id
 ACCIDENTAL_VEHICLES = []
+DOMAINS = {}
+
 COMMUNICATION_RANGE = 250  # range of communication [m]
+DOMAIN_RANGE = 2000  # range of domain [m]
 NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
 
 
 def draw_random_events():
-    numEvents = NUMBER_OF_EVENTS
-    while numEvents > 0:
-        timeStep = random.choice(list(TIME_STEPS))
+    num_events = NUMBER_OF_EVENTS
+    while num_events > 0:
+        time_step = random.choice(list(TIME_STEPS))
 
-        if timeStep not in EVENTS.keys():
-            vehicle = random.choice(list(TIME_STEPS[timeStep]))
+        if time_step not in EVENTS.keys():
+            vehicle = random.choice(list(TIME_STEPS[time_step]))
             if vehicle in EVENTS.values():
                 continue
 
-            EVENTS[timeStep] = vehicle
-            numEvents -= 1
+            EVENTS[time_step] = vehicle
+            num_events -= 1
 
 
 def create_accidental_vehicle(vehicle):
@@ -53,13 +57,13 @@ def accident_node_dissemination(vehicles, time_step):
                           event_time_stamp=time_step)
 
         for source_vehicle in vehicles.values():
-            distance_between = sqrt(pow(accidental_vehicle.pos_x - source_vehicle.pos_x, 2) +
-                                    pow(accidental_vehicle.pos_y - source_vehicle.pos_y, 2))
+            distance_between = get_distance(accidental_vehicle.pos_x, accidental_vehicle.pos_y,
+                                            source_vehicle.pos_x, source_vehicle.pos_y)
 
             if distance_between < COMMUNICATION_RANGE and message not in source_vehicle.bufor:
                 send_message(source_vehicle, message)
-                print("Sending message. \n\tSource id:", accidental_vehicle.id,
-                      "\n\tDestination id:", source_vehicle.id)
+                # print("Sending message. \n\tSource id:", accidental_vehicle.id,
+                #       "\n\tDestination id:", source_vehicle.id)
 
 
 def simulate():
