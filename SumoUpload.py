@@ -22,7 +22,7 @@ def sumo_upload(file):
                                   vehicle.attrib['x'],
                                   vehicle.attrib['y'],
                                   vehicle.attrib['speed'],
-                                  vehicle.attrib['lane'],
+                                  vehicle.attrib['lane'].partition('#')[0],  # delete '#' and everything after
                                   in_accident=False,
                                   angle=vehicle.attrib['angle'])
 

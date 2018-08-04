@@ -3,16 +3,18 @@ from Vehicle import *
 from Message import *
 from Domain import *
 from Utils import *
+from Statistics import *
 import random
 
 
 TIME_STEPS = sumo_upload('fcd_output.xml')
 EVENTS = {}  # time: id
 ACCIDENTAL_VEHICLES = []
-DOMAINS = {}
+DOMAINS = {}  # accidental_veh_id: Domain
 
 COMMUNICATION_RANGE = 250  # range of communication [m]
-DOMAIN_RANGE = 1000  # range of domain [m]
+DOMAIN_RANGE = 3000  # range of domain [m]
+DOMAIN_DURATION = 30  # duration of domain [s]
 NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
 
@@ -31,7 +33,7 @@ def draw_random_events():
             num_events -= 1
 
 
-def create_accidental_vehicle(vehicle):
+def create_accidental_vehicle(vehicle, time_step):
     """ Creates new accidental car by parameters of vehicle that already exist. """
     new_accidental_vehicle = Vehicle(vehicle.id,
                                      vehicle.pos_x,
@@ -43,10 +45,13 @@ def create_accidental_vehicle(vehicle):
 
     ACCIDENTAL_VEHICLES.append(new_accidental_vehicle)
 
-    DOMAINS[new_accidental_vehicle.id] = Domain(vehicle.pos_x,
+    DOMAINS[new_accidental_vehicle.id] = Domain(vehicle.id,
+                                                vehicle.pos_x,
                                                 vehicle.pos_y,
                                                 vehicle.angle,
-                                                vehicle.lane)
+                                                vehicle.lane,
+                                                float(time_step),
+                                                float(time_step) + DOMAIN_DURATION)
 
 
 def send_message(destination_vehicle, message):
@@ -77,13 +82,16 @@ def simulate():
         vehicles = TIME_STEPS[time_step]
 
         if time_step in EVENTS.keys():
-            create_accidental_vehicle(vehicles[EVENTS[time_step]])
-        # TODO: 1) Accidental nodes disseminate information
+            create_accidental_vehicle(vehicles[EVENTS[time_step]], time_step)
+        # TODO: 1) Accidental nodes disseminate information <done>
         accident_node_dissemination(vehicles, time_step)
 
         for vehicle_id in vehicles:
             # TODO: 2) Send and collect the messages
             pass
+
+        if len(DOMAINS) != 0:
+            get_statistics(time_step, vehicles, ACCIDENTAL_VEHICLES, DOMAINS)
 
 
 def main():
