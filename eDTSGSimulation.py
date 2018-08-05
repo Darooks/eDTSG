@@ -19,6 +19,16 @@ NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
 
 
+def update_vehicles_states(actual_step, previous_step, actual_vehicles):
+    previous_vehicles = TIME_STEPS[previous_step]
+
+    for vehicle_id in previous_vehicles:
+        if vehicle_id in actual_vehicles.keys():
+            actual_vehicles[vehicle_id].bufor.update(previous_vehicles[vehicle_id].bufor)
+
+    return actual_vehicles
+
+
 def draw_random_events():
     num_events = NUMBER_OF_EVENTS
     while num_events > 0:
@@ -59,13 +69,13 @@ def send_message(destination_vehicle, message):
     destination_vehicle.bufor[message.message_id] = message
 
 
-def accident_node_dissemination(vehicles, time_step):
+def accident_node_dissemination(vehicles, actual_time_step):
     """ Accidental nodes disseminate information about
     their accident to the vehicle that are in their domain and range"""
     for accidental_vehicle in ACCIDENTAL_VEHICLES:
         message = Message(message_id=accidental_vehicle.id,
                           lifetime=MESSAGES_LIFETIME,
-                          event_time_stamp=time_step)
+                          event_time_stamp=actual_time_step)
 
         for source_vehicle in vehicles.values():
             distance_between = get_distance(accidental_vehicle.pos_x, accidental_vehicle.pos_y,
@@ -78,12 +88,16 @@ def accident_node_dissemination(vehicles, time_step):
 
 
 def simulate():
+    previous_step = None
     for time_step in TIME_STEPS:
-        vehicles = TIME_STEPS[time_step]
+        # Update vehicles states- merging states between actual step with previous step
+        vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
+        if previous_step is not None:
+            vehicles = update_vehicles_states(time_step, previous_step, vehicles)  # merge states
 
         if time_step in EVENTS.keys():
             create_accidental_vehicle(vehicles[EVENTS[time_step]], time_step)
-        # TODO: 1) Accidental nodes disseminate information <done>
+        # 1) Accidental nodes disseminate information <done>
         accident_node_dissemination(vehicles, time_step)
 
         for vehicle_id in vehicles:
@@ -93,11 +107,13 @@ def simulate():
         if len(DOMAINS) != 0:
             get_statistics(time_step, vehicles, ACCIDENTAL_VEHICLES, DOMAINS)
 
+        previous_step = time_step
+
 
 def main():
     draw_random_events()
     simulate()
-
+    pass
 
 if __name__ == "__main__":
     main()

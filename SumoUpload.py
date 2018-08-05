@@ -10,7 +10,7 @@ def sumo_upload(file):
     TIME_STEPS = {}
 
     for timeStep in root:
-        time = timeStep.attrib['time']
+        time = float(timeStep.attrib['time'])
         VEHICLES = {}
 
         if len(timeStep.findall('vehicle')) == 0:
