@@ -1,5 +1,4 @@
 import Utils
-import eDTSGSimulation
 
 # TIME_STEPS = sumo_upload('fcd_output.xml')
 # EVENTS = {}  # time: id

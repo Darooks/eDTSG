@@ -11,12 +11,6 @@ TIME_STEPS = sumo_upload('fcd_output.xml')
 EVENTS = {}  # time: accidental_vehicle
 DOMAINS = {}  # accidental_veh_id: Domain
 
-COMMUNICATION_RANGE = 250  # range of communication [m]
-DOMAIN_RANGE = 500  # range of domain [m]
-DOMAIN_DURATION = 30  # duration of domain [s]
-NUMBER_OF_EVENTS = 10
-MESSAGES_LIFETIME = 10  # seconds
-
 
 def update_vehicles_states(actual_step, previous_step, actual_vehicles):
     previous_vehicles = TIME_STEPS[previous_step]
@@ -114,9 +108,9 @@ def simulate():
         # 1) Accidental nodes disseminate information <done>
         accident_node_dissemination(vehicles, time_step)
 
-        for vehicle_id in vehicles:
+        for vehicle in vehicles.values():
             # TODO: 2) Send and collect the messages
-            pass
+            vehicle.send_messages(vehicles.values())
 
         if len(DOMAINS) != 0:
             get_statistics(time_step, vehicles, DOMAINS)

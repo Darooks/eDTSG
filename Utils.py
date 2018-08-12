@@ -1,5 +1,10 @@
 from math import *
-import eDTSGSimulation
+
+COMMUNICATION_RANGE = 250  # range of communication [m]
+DOMAIN_RANGE = 500  # range of domain [m]
+DOMAIN_DURATION = 30  # duration of domain [s]
+NUMBER_OF_EVENTS = 10
+MESSAGES_LIFETIME = 10  # seconds
 
 
 def get_distance(x1, y1, x2, y2):
@@ -7,8 +12,8 @@ def get_distance(x1, y1, x2, y2):
 
 
 def get_middle_if_domain(x, y, angle):
-    x_ret = eDTSGSimulation.DOMAIN_RANGE/2 * cos(radians(angle)) + x
-    y_ret = eDTSGSimulation.DOMAIN_RANGE/2 * sin(radians(angle)) + y
+    x_ret = DOMAIN_RANGE/2 * cos(radians(angle)) + x
+    y_ret = DOMAIN_RANGE/2 * sin(radians(angle)) + y
     return x_ret, y_ret
 
 
@@ -18,7 +23,7 @@ def in_domain(vehicle, domain):
                             domain.mid_x,
                             domain.mid_y)
 
-    if distance <= eDTSGSimulation.DOMAIN_RANGE and \
+    if distance <= DOMAIN_RANGE and \
             vehicle.lane.replace('-', '') == domain.lane.replace('-', ''):  # delete '-' char from lane id
         return True
     else:
