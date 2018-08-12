@@ -12,7 +12,7 @@ import eDTSGSimulation
 # MESSAGES_LIFETIME = eDTSGSimulation.MESSAGES_LIFETIME  # seconds
 
 
-def get_statistics(time_step, vehicles, accidental_vehicles, domains):
+def get_statistics(time_step, vehicles, domains):
     print("Time step: ", time_step)
     for domain in domains.values():
         print("\tDomain", domain.id, "\n\tStart time:", domain.start_time, "\n\tlane:", domain.lane, "\n\tcontains:")

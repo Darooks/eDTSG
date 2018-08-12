@@ -8,12 +8,11 @@ import random
 
 
 TIME_STEPS = sumo_upload('fcd_output.xml')
-EVENTS = {}  # time: id
-ACCIDENTAL_VEHICLES = []
+EVENTS = {}  # time: accidental_vehicle
 DOMAINS = {}  # accidental_veh_id: Domain
 
 COMMUNICATION_RANGE = 250  # range of communication [m]
-DOMAIN_RANGE = 3000  # range of domain [m]
+DOMAIN_RANGE = 500  # range of domain [m]
 DOMAIN_DURATION = 30  # duration of domain [s]
 NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
@@ -27,6 +26,39 @@ def update_vehicles_states(actual_step, previous_step, actual_vehicles):
             actual_vehicles[vehicle_id].bufor.update(previous_vehicles[vehicle_id].bufor)
 
     return actual_vehicles
+
+
+def create_events():
+    """ Creates new accidental car by parameters of vehicle that already exist. """
+    # TODO: Create dissemination node. Accidental vehicle should be the dissemination node but Domain should have...
+    # TODO: ... the middle location.
+    acc_time_step = 5.0
+    acc_id = '1'
+
+    new_acc_domain = Domain('1',
+                            1037.67,
+                            585.98,
+                            252.64,
+                            '10249819',
+                            acc_time_step,
+                            acc_time_step + DOMAIN_DURATION)
+
+    DOMAINS[acc_id] = new_acc_domain
+
+    acc_veh_x, acc_veh_y = Utils.point_pos(new_acc_domain.mid_x,
+                                           new_acc_domain.mid_y,
+                                           DOMAIN_RANGE / 2,
+                                           new_acc_domain.angle)
+
+    acc_vehicle = Vehicle(acc_id,
+                          acc_veh_x,
+                          acc_veh_y,
+                          speed=0,
+                          lane=new_acc_domain.lane,
+                          in_accident=True,
+                          angle=new_acc_domain.angle)
+
+    EVENTS[acc_time_step] = acc_vehicle
 
 
 def draw_random_events():
@@ -43,27 +75,6 @@ def draw_random_events():
             num_events -= 1
 
 
-def create_accidental_vehicle(vehicle, time_step):
-    """ Creates new accidental car by parameters of vehicle that already exist. """
-    new_accidental_vehicle = Vehicle(vehicle.id,
-                                     vehicle.pos_x,
-                                     vehicle.pos_y,
-                                     speed=0,
-                                     lane=vehicle.lane,
-                                     in_accident=True,
-                                     angle=vehicle.angle)
-
-    ACCIDENTAL_VEHICLES.append(new_accidental_vehicle)
-
-    DOMAINS[new_accidental_vehicle.id] = Domain(vehicle.id,
-                                                vehicle.pos_x,
-                                                vehicle.pos_y,
-                                                vehicle.angle,
-                                                vehicle.lane,
-                                                float(time_step),
-                                                float(time_step) + DOMAIN_DURATION)
-
-
 def send_message(destination_vehicle, message):
     message.update_sequence.append(destination_vehicle.id)
     destination_vehicle.bufor[message.message_id] = message
@@ -72,7 +83,12 @@ def send_message(destination_vehicle, message):
 def accident_node_dissemination(vehicles, actual_time_step):
     """ Accidental nodes disseminate information about
     their accident to the vehicle that are in their domain and range"""
-    for accidental_vehicle in ACCIDENTAL_VEHICLES:
+
+    for time_step in EVENTS:
+        if float(time_step) > float(actual_time_step):
+            continue
+
+        accidental_vehicle = EVENTS[time_step]
         message = Message(message_id=accidental_vehicle.id,
                           lifetime=MESSAGES_LIFETIME,
                           event_time_stamp=actual_time_step)
@@ -95,8 +111,6 @@ def simulate():
         if previous_step is not None:
             vehicles = update_vehicles_states(time_step, previous_step, vehicles)  # merge states
 
-        if time_step in EVENTS.keys():
-            create_accidental_vehicle(vehicles[EVENTS[time_step]], time_step)
         # 1) Accidental nodes disseminate information <done>
         accident_node_dissemination(vehicles, time_step)
 
@@ -105,15 +119,17 @@ def simulate():
             pass
 
         if len(DOMAINS) != 0:
-            get_statistics(time_step, vehicles, ACCIDENTAL_VEHICLES, DOMAINS)
+            get_statistics(time_step, vehicles, DOMAINS)
 
         previous_step = time_step
 
 
 def main():
-    draw_random_events()
+    # draw_random_events()
+    create_events()
     simulate()
     pass
+
 
 if __name__ == "__main__":
     main()

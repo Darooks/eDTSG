@@ -23,3 +23,8 @@ def in_domain(vehicle, domain):
         return True
     else:
         return False
+
+
+def point_pos(x0, y0, d, theta):
+    theta_rad = pi/2 - radians(theta)
+    return x0 + d*cos(theta_rad), y0 + d*sin(theta_rad)

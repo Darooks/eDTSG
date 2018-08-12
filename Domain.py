@@ -12,14 +12,14 @@ def get_middle_if_domain(x, y, angle):
 class Domain:
     def __init__(self,
                  id,
-                 vehicle_x,
-                 vehicle_y,
+                 mid_x,
+                 mid_y,
                  angle,
                  lane,
                  start_time,
                  end_time):
         self.id = id
-        self.mid_x, self.mid_y = get_middle_if_domain(vehicle_x, vehicle_y, angle)
+        self.mid_x, self.mid_y = mid_x, mid_y
         self.angle = angle
         self.lane = lane
         self.range = eDTSGSimulation.DOMAIN_RANGE
