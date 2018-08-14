@@ -21,6 +21,15 @@ class Vehicle:
         self.bufor      = {}
         self._messages  = {}
 
+    def get_messages(self):
+        return self._messages
+
+    def set_messages(self, _messages):
+        self._messages = _messages
+
+    def update_messages(self, _messages):
+        self._messages.update(_messages)
+
     def check_if_message_is_in_bufor(self, message_id):
         if message_id in self.bufor.keys():
             return True
@@ -47,6 +56,7 @@ class Vehicle:
         for id_message in self.bufor:
             if id_message not in self._messages:
                 self._messages[id_message] = self.bufor[id_message]
-                del self.bufor[id_message]
             else:
                 pass
+
+        self.bufor.clear()

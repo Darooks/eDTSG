@@ -18,6 +18,7 @@ def update_vehicles_states(actual_step, previous_step, actual_vehicles):
     for vehicle_id in previous_vehicles:
         if vehicle_id in actual_vehicles.keys():
             actual_vehicles[vehicle_id].bufor.update(previous_vehicles[vehicle_id].bufor)
+            actual_vehicles[vehicle_id].update_messages(previous_vehicles[vehicle_id].get_messages())
 
     return actual_vehicles
 
@@ -72,6 +73,7 @@ def draw_random_events():
 def send_message(destination_vehicle, message):
     message.update_sequence.append(destination_vehicle.id)
     destination_vehicle.bufor[message.message_id] = message
+    destination_vehicle.collect_messages()
 
 
 def accident_node_dissemination(vehicles, actual_time_step):
@@ -83,15 +85,16 @@ def accident_node_dissemination(vehicles, actual_time_step):
             continue
 
         accidental_vehicle = EVENTS[time_step]
-        message = Message(message_id=accidental_vehicle.id,
-                          lifetime=MESSAGES_LIFETIME,
-                          event_time_stamp=actual_time_step)
 
         for source_vehicle in vehicles.values():
             distance_between = get_distance(accidental_vehicle.pos_x, accidental_vehicle.pos_y,
                                             source_vehicle.pos_x, source_vehicle.pos_y)
 
-            if distance_between < COMMUNICATION_RANGE and message not in source_vehicle.bufor:
+            if distance_between < COMMUNICATION_RANGE:
+                message = Message(message_id=accidental_vehicle.id,
+                                  lifetime=MESSAGES_LIFETIME,
+                                  event_time_stamp=actual_time_step)
+
                 send_message(source_vehicle, message)
                 # print("Sending message. \n\tSource id:", accidental_vehicle.id,
                 #       "\n\tDestination id:", source_vehicle.id)
@@ -110,7 +113,8 @@ def simulate():
 
         for vehicle in vehicles.values():
             # TODO: 2) Send and collect the messages
-            vehicle.send_messages(vehicles.values())
+            # vehicle.send_messages(vehicles.values())
+            pass
 
         if len(DOMAINS) != 0:
             get_statistics(time_step, vehicles, DOMAINS)
