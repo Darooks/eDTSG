@@ -28,9 +28,9 @@ def create_events():
     # TODO: Create dissemination node. Accidental vehicle should be the dissemination node but Domain should have...
     # TODO: ... the middle location.
     acc_time_step = 5.0
-    acc_id = '1'
+    acc_id = '0'
 
-    new_acc_domain = Domain('1',
+    new_acc_domain = Domain(acc_id,
                             1037.67,
                             585.98,
                             252.64,
@@ -108,6 +108,10 @@ def simulate():
         if previous_step is not None:
             vehicles = update_vehicles_states(time_step, previous_step, vehicles)  # merge states
 
+        # Update domains
+        for domain in DOMAINS.values():
+            domain.update_domain(vehicles.values())
+
         # 1) Accidental nodes disseminate information <done>
         accident_node_dissemination(vehicles, time_step)
 
@@ -116,8 +120,8 @@ def simulate():
             # vehicle.send_messages(vehicles.values())
             pass
 
-        if len(DOMAINS) != 0:
-            get_statistics(time_step, vehicles, DOMAINS)
+        # if len(DOMAINS) != 0:
+        #     get_statistics(time_step, vehicles, DOMAINS)
 
         previous_step = time_step
 
