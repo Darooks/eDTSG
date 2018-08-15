@@ -1,4 +1,5 @@
-from Utils import get_distance, COMMUNICATION_RANGE
+from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, MESSAGES_LIFETIME
+from Message import Message
 
 
 class Vehicle:
@@ -11,22 +12,35 @@ class Vehicle:
                  in_accident=False,
                  angle=0):
 
-        self.id         = id
-        self.pos_x      = float(pos_x)
-        self.pos_y      = float(pos_y)
-        self.speed      = float(speed)
-        self.lane       = lane
-        self.in_accident= in_accident
-        self.angle      = float(angle)
-        self.bufor      = {}
-        self._messages  = {}
+        self.id                         = id
+        self.pos_x                      = float(pos_x)
+        self.pos_y                      = float(pos_y)
+        self.speed                      = float(speed)
+        self.lane                       = lane
+        self.in_accident                = in_accident
+        self.angle                      = float(angle)
+        self.bufor                      = {}  # id_domain/id_message: message
+        self._messages                  = {}  # id_domain/id_message: message
+        self._extra_length_per_message  = {}  # id_domain/id_message: extra_length
 
+    # *************
+    # * GETS/SETS *
+    # *************
     def get_messages(self):
         return self._messages
 
     def set_messages(self, _messages):
         self._messages = _messages
 
+    def get_extra_length_per_message(self):
+        return self._extra_length_per_message
+
+    def set_extra_length_per_message(self, _extra_length_per_message):
+        self._extra_length_per_message = _extra_length_per_message
+
+    # *****************
+    # * OTHER METHODS *
+    # *****************
     def update_messages(self, _messages):
         self._messages.update(_messages)
 
@@ -36,27 +50,44 @@ class Vehicle:
         else:
             return False
 
-    def send_messages(self, vehicles):
-        for vehicle in vehicles:
-            if vehicle.id is self.id:
+    def is_messages_dict_empty(self):
+        if len(self._messages) > 0:
+            return False
+        else:
+            return True
+
+    def send_messages(self, dest_vehicles):
+        for dest_vehicle in dest_vehicles:
+            if dest_vehicle.id is self.id:
                 continue
 
             distance = get_distance(self.pos_x,
                                     self.pos_y,
-                                    vehicle.pos_x,
-                                    vehicle.pos_y)
+                                    dest_vehicle.pos_x,
+                                    dest_vehicle.pos_y)
 
             if distance <= COMMUNICATION_RANGE:
-                vehicle.bufor = self._messages.copy()
+                for message in self._messages.values():
+                    new_message = Message(message_id=message.message_id,
+                                          lifetime=message.lifetime,
+                                          event_time_stamp=message.event_time_stamp,
+                                          update_sequence=message.update_sequence.copy())
 
-            # at the end destinetion vehicle must collect the message
-            vehicle.collect_messages()
+                    dest_vehicle.bufor[message.message_id] = new_message
+
+                # at the end destinetion vehicle must collect the message
+                dest_vehicle.collect_messages()
 
     def collect_messages(self):
         for id_message in self.bufor:
             if id_message not in self._messages:
                 self._messages[id_message] = self.bufor[id_message]
+                self._messages[id_message].update_sequence.append(self.id)
+
+                vehicle_density = DOMAINS[id_message].vehicle_density
+                self._extra_length_per_message[id_message] = DOMAIN_RANGE / vehicle_density
             else:
                 pass
 
         self.bufor.clear()
+        pass

@@ -8,11 +8,9 @@ import random
 
 
 TIME_STEPS = sumo_upload('fcd_output.xml')
-EVENTS = {}  # time: accidental_vehicle
-DOMAINS = {}  # accidental_veh_id: Domain
 
 
-def update_vehicles_states(actual_step, previous_step, actual_vehicles):
+def update_vehicles_states(actual_vehicles, previous_step):
     previous_vehicles = TIME_STEPS[previous_step]
 
     for vehicle_id in previous_vehicles:
@@ -20,15 +18,17 @@ def update_vehicles_states(actual_step, previous_step, actual_vehicles):
             actual_vehicles[vehicle_id].bufor.update(previous_vehicles[vehicle_id].bufor)
             actual_vehicles[vehicle_id].update_messages(previous_vehicles[vehicle_id].get_messages())
 
+            actual_vehicles[vehicle_id].set_extra_length_per_message(
+                previous_vehicles[vehicle_id].get_extra_length_per_message()
+            )
+
     return actual_vehicles
 
 
 def create_events():
     """ Creates new accidental car by parameters of vehicle that already exist. """
-    # TODO: Create dissemination node. Accidental vehicle should be the dissemination node but Domain should have...
-    # TODO: ... the middle location.
     acc_time_step = 5.0
-    acc_id = '0'
+    acc_id = '0#acc'
 
     new_acc_domain = Domain(acc_id,
                             1037.67,
@@ -40,10 +40,10 @@ def create_events():
 
     DOMAINS[acc_id] = new_acc_domain
 
-    acc_veh_x, acc_veh_y = Utils.point_pos(new_acc_domain.mid_x,
-                                           new_acc_domain.mid_y,
-                                           DOMAIN_RANGE / 2,
-                                           new_acc_domain.angle)
+    acc_veh_x, acc_veh_y = point_pos(new_acc_domain.mid_x,
+                                     new_acc_domain.mid_y,
+                                     DOMAIN_RANGE / 2,
+                                     new_acc_domain.angle)
 
     acc_vehicle = Vehicle(acc_id,
                           acc_veh_x,
@@ -71,9 +71,8 @@ def draw_random_events():
 
 
 def send_message(destination_vehicle, message):
-    message.update_sequence.append(destination_vehicle.id)
-    destination_vehicle.bufor[message.message_id] = message
-    destination_vehicle.collect_messages()
+    destination_vehicle.bufor[message.message_id] = message  # send message
+    destination_vehicle.collect_messages()                   # destination node get the message
 
 
 def accident_node_dissemination(vehicles, actual_time_step):
@@ -106,7 +105,7 @@ def simulate():
         # Update vehicles states- merging states between actual step with previous step
         vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
         if previous_step is not None:
-            vehicles = update_vehicles_states(time_step, previous_step, vehicles)  # merge states
+            vehicles = update_vehicles_states(vehicles, previous_step)  # merge states
 
         # Update domains
         for domain in DOMAINS.values():
@@ -117,11 +116,12 @@ def simulate():
 
         for vehicle in vehicles.values():
             # TODO: 2) Send and collect the messages
-            # vehicle.send_messages(vehicles.values())
+            if vehicle.is_messages_dict_empty() is False:
+                vehicle.send_messages(vehicles.values())
             pass
 
         # if len(DOMAINS) != 0:
-        #     get_statistics(time_step, vehicles, DOMAINS)
+        #     get_statistics(time_step, vehicles)
 
         previous_step = time_step
 

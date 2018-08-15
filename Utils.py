@@ -6,6 +6,9 @@ DOMAIN_DURATION = 30  # duration of domain [s]
 NUMBER_OF_EVENTS = 10
 MESSAGES_LIFETIME = 10  # seconds
 
+EVENTS = {}  # time: accidental_vehicle
+DOMAINS = {}  # accidental_veh_id: Domain
+
 
 def get_distance(x1, y1, x2, y2):
     return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))
