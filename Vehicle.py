@@ -1,4 +1,4 @@
-from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, MESSAGES_LIFETIME
+from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, VehicleType, check_vehicle_type
 from Message import Message
 
 
@@ -36,7 +36,7 @@ class Vehicle:
         return self._extra_length_per_message
 
     def set_extra_length_per_message(self, _extra_length_per_message):
-        self._extra_length_per_message = _extra_length_per_message
+        self._extra_length_per_message = _extra_length_per_message.copy()
 
     # *****************
     # * OTHER METHODS *
@@ -68,10 +68,16 @@ class Vehicle:
 
             if distance <= COMMUNICATION_RANGE:
                 for message in self._messages.values():
+                    destination_vehicle_type = check_vehicle_type(self, dest_vehicle, message.vehicle_type)
+
+                    if destination_vehicle_type is VehicleType.NONE:
+                        continue  # if destination vehicle is not intended, helping or source vehicle go out
+
                     new_message = Message(message_id=message.message_id,
                                           lifetime=message.lifetime,
                                           event_time_stamp=message.event_time_stamp,
-                                          update_sequence=message.update_sequence.copy())
+                                          update_sequence=message.update_sequence.copy(),
+                                          vehicle_type=destination_vehicle_type)
 
                     dest_vehicle.bufor[message.message_id] = new_message
 

@@ -1,4 +1,5 @@
 from math import *
+from enum import Enum
 
 COMMUNICATION_RANGE = 250  # range of communication [m]
 DOMAIN_RANGE = 500  # range of domain [m]
@@ -8,6 +9,35 @@ MESSAGES_LIFETIME = 10  # seconds
 
 EVENTS = {}  # time: accidental_vehicle
 DOMAINS = {}  # accidental_veh_id: Domain
+
+
+class VehicleType(Enum):
+    NONE = 0,
+    SOURCE = 1,
+    INTENDED = 2,
+    HELPING = 3,
+
+
+def check_vehicle_type(source_vehicle, destination_vehicle, source_vehicle_type):
+    if source_vehicle_type is VehicleType.SOURCE:  # if source vehicle is disseminating
+        if source_vehicle.lane == destination_vehicle.lane:
+            return VehicleType.INTENDED
+        elif source_vehicle.lane.strip('-') == destination_vehicle.lane.strip('-'):
+            return VehicleType.HELPING
+        else:
+            return VehicleType.NONE
+    else:  # if other vehicles are exchanging the messages
+        if source_vehicle.lane == destination_vehicle.lane:
+            return source_vehicle_type
+        elif source_vehicle.lane.strip('-') == destination_vehicle.lane.strip('-'):
+            if source_vehicle_type is VehicleType.INTENDED:
+                return VehicleType.HELPING
+            elif source_vehicle_type is VehicleType.HELPING:
+                return VehicleType.INTENDED
+            else:
+                return VehicleType.NONE
+        else:
+            return VehicleType.NONE
 
 
 def get_distance(x1, y1, x2, y2):

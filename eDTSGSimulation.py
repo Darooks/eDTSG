@@ -86,17 +86,20 @@ def accident_node_dissemination(vehicles, actual_time_step):
         accidental_vehicle = EVENTS[time_step]
 
         for source_vehicle in vehicles.values():
+            source_vehicle_type = check_vehicle_type(accidental_vehicle, source_vehicle, VehicleType.SOURCE)
+
             distance_between = get_distance(accidental_vehicle.pos_x, accidental_vehicle.pos_y,
                                             source_vehicle.pos_x, source_vehicle.pos_y)
 
-            if distance_between < COMMUNICATION_RANGE:
+            if distance_between < COMMUNICATION_RANGE and source_vehicle_type is not VehicleType.NONE:
                 message = Message(message_id=accidental_vehicle.id,
                                   lifetime=MESSAGES_LIFETIME,
-                                  event_time_stamp=actual_time_step)
+                                  event_time_stamp=actual_time_step,
+                                  vehicle_type=source_vehicle_type)
 
                 send_message(source_vehicle, message)
-                # print("Sending message. \n\tSource id:", accidental_vehicle.id,
-                #       "\n\tDestination id:", source_vehicle.id)
+                # print("Sending message. \n\tSource id:", accidental_vehicle.id, "lane:", accidental_vehicle.lane,
+                #       "\n\tDestination id:", source_vehicle.id, "lane:", source_vehicle.lane)
 
 
 def simulate():
@@ -111,7 +114,7 @@ def simulate():
         for domain in DOMAINS.values():
             domain.update_domain(vehicles.values())
 
-        # 1) Accidental nodes disseminate information <done>
+        # Accidental nodes disseminate information
         accident_node_dissemination(vehicles, time_step)
 
         for vehicle in vehicles.values():
