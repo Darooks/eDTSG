@@ -5,7 +5,9 @@ COMMUNICATION_RANGE = 250  # range of communication [m]
 DOMAIN_RANGE = 500  # range of domain [m]
 DOMAIN_DURATION = 30  # duration of domain [s]
 NUMBER_OF_EVENTS = 10
-MESSAGES_LIFETIME = 10  # seconds
+MESSAGES_LIFETIME = 100  # seconds
+MAX_INTEDED_VEHICLE_DESTINATION = 3  # how many intended vehicles should take the message
+MAX_HELPING_VEHICLE_DESTINATION = 3  # how many helping vehicles should take the message
 
 EVENTS = {}  # time: accidental_vehicle
 DOMAINS = {}  # accidental_veh_id: Domain
@@ -16,6 +18,11 @@ class VehicleType(Enum):
     SOURCE = 1,
     INTENDED = 2,
     HELPING = 3,
+
+
+class Phase(Enum):
+    PRE_STABLE = 0,
+    STABLE = 1,
 
 
 def check_vehicle_type(source_vehicle, destination_vehicle, source_vehicle_type):
@@ -61,6 +68,21 @@ def in_domain(vehicle, domain):
         return True
     else:
         return False
+
+
+def in_extra_region(vehicle, domain, extra_region_distance):
+    distance = get_distance(vehicle.pos_x,
+                            vehicle.pos_y,
+                            domain.mid_x,
+                            domain.mid_y)
+
+    if distance > DOMAIN_RANGE and \
+            distance <= DOMAIN_RANGE + extra_region_distance and \
+            vehicle.lane.replace('-', '') == domain.lane.replace('-', ''):
+        return True
+    else:
+        return False
+
 
 
 def point_pos(x0, y0, d, theta):

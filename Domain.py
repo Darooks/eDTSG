@@ -1,5 +1,5 @@
 import eDTSGSimulation
-from Utils import in_domain, DOMAIN_RANGE
+from Utils import in_domain, DOMAIN_RANGE, Phase
 from math import *
 
 
@@ -26,6 +26,7 @@ class Domain:
         self.start_time = start_time
         self.end_time = end_time
         self.vehicle_density = 0
+        self.phase = Phase.PRE_STABLE
 
     def update_domain(self, vehicles):
         # Updating vehicle density

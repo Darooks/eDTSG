@@ -22,6 +22,8 @@ def update_vehicles_states(actual_vehicles, previous_step):
                 previous_vehicles[vehicle_id].get_extra_length_per_message()
             )
 
+            actual_vehicles[vehicle_id].update_messages_statuses()
+
     return actual_vehicles
 
 
@@ -54,6 +56,9 @@ def create_events():
                           angle=new_acc_domain.angle)
 
     EVENTS[acc_time_step] = acc_vehicle
+
+    print("Domain x:", new_acc_domain.mid_x, "y:", new_acc_domain.mid_y)
+    print("Acc vehicle x:", acc_vehicle.pos_x, "y:", acc_vehicle.pos_y)
 
 
 def draw_random_events():
@@ -105,6 +110,7 @@ def accident_node_dissemination(vehicles, actual_time_step):
 def simulate():
     previous_step = None
     for time_step in TIME_STEPS:
+        print("Time step:", time_step)
         # Update vehicles states- merging states between actual step with previous step
         vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
         if previous_step is not None:
