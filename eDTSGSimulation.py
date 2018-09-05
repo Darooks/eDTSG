@@ -127,7 +127,7 @@ def accident_node_dissemination(vehicles, actual_time_step):
                 #       "\n\tDestination id:", source_vehicle.id, "lane:", source_vehicle.lane)
 
 
-def simulate():
+def simulate(output_file):
     previous_step = None
     for time_step in TIME_STEPS:
         print("Time step:", time_step)
@@ -150,15 +150,16 @@ def simulate():
             pass
 
         if len(DOMAINS) != 0:
-            get_statistics(time_step, vehicles)
+            get_statistics(time_step, vehicles, output_file)
 
         previous_step = time_step
 
 
 def main():
     # draw_random_events()
+    output_file = open("output_file.txt", "w")
     create_events()
-    simulate()
+    simulate(output_file)
     pass
 
 
