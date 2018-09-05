@@ -4,6 +4,7 @@ from Message import Message
 
 TO_DROP = "DROPPED"
 
+
 class Vehicle:
     def __init__(self,
                  id,
@@ -31,8 +32,14 @@ class Vehicle:
     def get_messages(self):
         return self._messages
 
+    def get_messages_element(self, id_msg):
+        return self._messages[id_msg]
+
     def set_messages(self, _messages):
         self._messages = _messages
+
+    def set_messages_element(self, id_msg, message):
+        self._messages[id_msg] = message
 
     def get_extra_length_per_message(self):
         return self._extra_region_distance_per_message
@@ -84,7 +91,7 @@ class Vehicle:
                 print("Domain gets STABLE state")
 
     def _drop_message(self, message):
-        print("I am vehicle nr", self.id, "[DROPPING THE MESSAGE]")
+        # print("I am vehicle nr", self.id, "[DROPPING THE MESSAGE]")
         del self._extra_region_distance_per_message[message.message_id]
         self._messages[message.message_id] = TO_DROP
         del message
@@ -119,10 +126,10 @@ class Vehicle:
             domain_phase = DOMAINS[message.message_id].phase
 
             if domain_phase is Phase.PRE_STABLE:
-                print("I am vehicle nr", self.id, "[PRE-STABLE functionality]")
+                # print("I am vehicle nr", self.id, "[PRE-STABLE functionality]")
                 self._pre_stable_message_process(message)
             else:
-                print("I am vehicle nr", self.id, "[STABLE functionality]")
+                # print("I am vehicle nr", self.id, "[STABLE functionality]")
                 self._stable_message_process(message)
 
         # Update: delete dropped messages
@@ -154,7 +161,8 @@ class Vehicle:
                                           lifetime=message.lifetime,
                                           event_time_stamp=message.event_time_stamp,
                                           update_sequence=message.update_sequence.copy(),
-                                          vehicle_type=destination_vehicle_type)
+                                          vehicle_type=destination_vehicle_type,
+                                          version_time_stamp=message.version_time_stamp)
                     dest_vehicle.bufor[message.message_id] = new_message
 
                     # Message is sent - update counters
@@ -163,7 +171,7 @@ class Vehicle:
                     elif destination_vehicle_type is VehicleType.INTENDED:
                         message.increment_intended_vehicle_counter()
 
-                # at the end destinetion vehicle must collect the message
+                # at the end - destination vehicle must collect the message
                 dest_vehicle.collect_messages()
 
     def collect_messages(self):
@@ -174,6 +182,17 @@ class Vehicle:
 
                 vehicle_density = DOMAINS[id_message].vehicle_density
                 self._extra_region_distance_per_message[id_message] = DOMAIN_RANGE / vehicle_density
+            elif id_message in self._messages \
+                    and self._messages[id_message].version_time_stamp < self.bufor[id_message].version_time_stamp:
+                """ Destination vehicle has the message but source vehicle's message is newer by version time stamp """
+                self._messages[id_message] = self.bufor[id_message]
+                self._messages[id_message].update_sequence.append(self.id)
+
+                vehicle_density = DOMAINS[id_message].vehicle_density
+                self._extra_region_distance_per_message[id_message] = DOMAIN_RANGE / vehicle_density
+
+                # print("Vehicle:", self.id, "updates info")
+                # TODO: Compute messages when they came to an end
             else:
                 pass
 

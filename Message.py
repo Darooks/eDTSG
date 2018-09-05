@@ -10,7 +10,8 @@ class Message:
                  sender_location=None,
                  spread_and_assurance_lifetime=0,
                  update_sequence=None,
-                 vehicle_type=None):
+                 vehicle_type=None,
+                 version_time_stamp=None):
         self.message_id                      = message_id
         self.event_location                  = event_location
         self.lifetime                        = lifetime
@@ -19,9 +20,11 @@ class Message:
         self.spread_and_assurance_lifetime   = spread_and_assurance_lifetime
         self.update_sequence                 = [message_id] if update_sequence is None else update_sequence
         self.vehicle_type                    = VehicleType.NONE if vehicle_type is None else vehicle_type
+        self.is_sleeping = False
+        self.version_time_stamp              = 0 if version_time_stamp is None else version_time_stamp
+
         self._intended_vehicle_counter       = 0
         self._helping_vehicle_counted        = 0
-        self.is_sleeping                     = False
         self._authentic_event                = None  # My modification
         self._non_authentic_event            = None  # My modification
 

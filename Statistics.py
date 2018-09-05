@@ -1,4 +1,4 @@
-from Utils import DOMAINS, in_domain
+from Utils import DOMAINS, in_domain, EVENTS_IS_ONLINE
 
 # TIME_STEPS = sumo_upload('fcd_output.xml')
 # EVENTS = {}  # time: id
@@ -11,12 +11,54 @@ from Utils import DOMAINS, in_domain
 # MESSAGES_LIFETIME = eDTSGSimulation.MESSAGES_LIFETIME  # seconds
 
 
-def get_statistics(time_step, vehicles):
-    print("Time step: ", time_step)
-    for domain in DOMAINS.values():
-        print("\tDomain", domain.id, "\n\tStart time:", domain.start_time, "\n\tlane:", domain.lane, "\n\tcontains:")
-        for vehicle in vehicles.values():
-            if in_domain(vehicle, domain) is True:
-                print("\t\t", vehicle.id, "angle:", vehicle.angle, "lane:", vehicle.lane)
+def get_awared_vehicles(vehicles, domain):
+    total_active_vehicles_in_domain = 0
+    total_aware_vehicles_in_domain = 0
 
+    for vehicle in vehicles.values():
+        if in_domain(vehicle, domain) is True:
+            # print("\t\t", vehicle.id, "angle:", vehicle.angle, "lane:", vehicle.lane)
+            total_active_vehicles_in_domain += 1
+
+        if in_domain(vehicle, domain) is True and domain.id in vehicle.get_messages():
+            total_aware_vehicles_in_domain += 1
+
+    if total_active_vehicles_in_domain != 0:
+        total_awareness = 100 * total_aware_vehicles_in_domain / total_active_vehicles_in_domain
+        print("Total awared vehicles:", total_awareness, "%")
         print("\n")
+    else:
+        print("There are no active vehicles")
+
+
+def get_awared_vehicles_non_active_domain(vehicles, domain):
+    total_active_vehicles_in_domain = 0
+    total_aware_vehicles_in_domain = 0
+
+    for vehicle in vehicles.values():
+        if in_domain(vehicle, domain) is True:
+            # print("\t\t", vehicle.id, "angle:", vehicle.angle, "lane:", vehicle.lane)
+            total_active_vehicles_in_domain += 1
+
+        if in_domain(vehicle, domain) is True \
+                and domain.id in vehicle.get_messages() \
+                and vehicle.get_messages()[domain.id].lifetime == 0.0:
+            total_aware_vehicles_in_domain += 1
+
+    if total_active_vehicles_in_domain != 0:
+        total_awareness = 100 * total_aware_vehicles_in_domain / total_active_vehicles_in_domain
+        print("[N] Total awared vehicles:", total_awareness, "%")
+        print("\n")
+    else:
+        print("There are no active vehicles")
+
+
+def get_statistics(actual_time_step, vehicles):
+    for domain in DOMAINS.values():
+        if actual_time_step < domain.start_time:
+            continue
+        print("\tDomain", domain.id, "\n\tStart time:", domain.start_time, "\n\tlane:", domain.lane, "\n\tcontains:")
+
+        # get_awared_vehicles(vehicles, domain)
+        if EVENTS_IS_ONLINE[domain.id] is False:
+            get_awared_vehicles_non_active_domain(vehicles, domain)

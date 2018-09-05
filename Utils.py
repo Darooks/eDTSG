@@ -1,15 +1,17 @@
 from math import *
 from enum import Enum
 
-COMMUNICATION_RANGE = 250  # range of communication [m]
+COMMUNICATION_RANGE = 50  # range of communication [m] (250)
 DOMAIN_RANGE = 500  # range of domain [m]
 DOMAIN_DURATION = 30  # duration of domain [s]
 NUMBER_OF_EVENTS = 10
-MESSAGES_LIFETIME = 100  # seconds
+MESSAGES_LIFETIME = 1000  # seconds
+MESSAGES_LIFETIME_BREAK = 30
 MAX_INTEDED_VEHICLE_DESTINATION = 3  # how many intended vehicles should take the message
 MAX_HELPING_VEHICLE_DESTINATION = 3  # how many helping vehicles should take the message
 
 EVENTS = {}  # time: accidental_vehicle
+EVENTS_IS_ONLINE = {}  # accidental_vehicle_id: true/false (is active / is not active)
 DOMAINS = {}  # accidental_veh_id: Domain
 
 
@@ -82,7 +84,6 @@ def in_extra_region(vehicle, domain, extra_region_distance):
         return True
     else:
         return False
-
 
 
 def point_pos(x0, y0, d, theta):

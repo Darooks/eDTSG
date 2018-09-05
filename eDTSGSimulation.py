@@ -56,6 +56,15 @@ def create_events():
                           angle=new_acc_domain.angle)
 
     EVENTS[acc_time_step] = acc_vehicle
+    EVENTS_IS_ONLINE[acc_id] = True
+
+    message = Message(message_id=acc_id,
+                      lifetime=MESSAGES_LIFETIME,
+                      event_time_stamp=acc_time_step,
+                      vehicle_type=VehicleType.SOURCE,
+                      version_time_stamp=acc_time_step)
+
+    acc_vehicle.set_messages_element(acc_id, message)
 
     print("Domain x:", new_acc_domain.mid_x, "y:", new_acc_domain.mid_y)
     print("Acc vehicle x:", acc_vehicle.pos_x, "y:", acc_vehicle.pos_y)
@@ -82,13 +91,23 @@ def send_message(destination_vehicle, message):
 
 def accident_node_dissemination(vehicles, actual_time_step):
     """ Accidental nodes disseminate information about
-    their accident to the vehicle that are in their domain and range"""
+    their accident to the vehicle that are in their domain and range """
 
     for time_step in EVENTS:
         if float(time_step) > float(actual_time_step):
             continue
 
         accidental_vehicle = EVENTS[time_step]
+
+        message_info = accidental_vehicle.get_messages_element(accidental_vehicle.id)
+
+        #  Suddenly end the event
+        if message_info.event_time_stamp + MESSAGES_LIFETIME_BREAK <= actual_time_step\
+                and EVENTS_IS_ONLINE[accidental_vehicle.id] is True:
+            # print("EVENT no longer exist")
+            message_info.lifetime = 0.0
+            message_info.version_time_stamp = actual_time_step
+            EVENTS_IS_ONLINE[accidental_vehicle.id] = False
 
         for source_vehicle in vehicles.values():
             source_vehicle_type = check_vehicle_type(accidental_vehicle, source_vehicle, VehicleType.SOURCE)
@@ -97,10 +116,11 @@ def accident_node_dissemination(vehicles, actual_time_step):
                                             source_vehicle.pos_x, source_vehicle.pos_y)
 
             if distance_between < COMMUNICATION_RANGE and source_vehicle_type is not VehicleType.NONE:
-                message = Message(message_id=accidental_vehicle.id,
-                                  lifetime=MESSAGES_LIFETIME,
-                                  event_time_stamp=actual_time_step,
-                                  vehicle_type=source_vehicle_type)
+                message = Message(message_id=message_info.message_id,
+                                  lifetime=message_info.lifetime,
+                                  event_time_stamp=message_info.event_time_stamp,
+                                  vehicle_type=source_vehicle_type,
+                                  version_time_stamp=message_info.version_time_stamp)
 
                 send_message(source_vehicle, message)
                 # print("Sending message. \n\tSource id:", accidental_vehicle.id, "lane:", accidental_vehicle.lane,
@@ -129,8 +149,8 @@ def simulate():
                 vehicle.send_messages(vehicles.values())
             pass
 
-        # if len(DOMAINS) != 0:
-        #     get_statistics(time_step, vehicles)
+        if len(DOMAINS) != 0:
+            get_statistics(time_step, vehicles)
 
         previous_step = time_step
 
