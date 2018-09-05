@@ -1,6 +1,6 @@
 from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, VehicleType, check_vehicle_type, \
     MAX_HELPING_VEHICLE_DESTINATION, MAX_INTEDED_VEHICLE_DESTINATION, in_domain, in_extra_region, Phase,\
-    EVENTS_IS_ONLINE
+    EVENTS_IS_ONLINE, EVENTS
 from Message import Message
 
 TO_DROP = "DROPPED"
@@ -143,6 +143,11 @@ class Vehicle:
     def check_and_vote_authenticity(self, message, actual_time_step):
         if message.message_id not in self._voted_messages:
             self._voted_messages[message.message_id] = None
+
+        # TODO: Check if vehicle is close enough to decide whether event is true or not
+        distance = get_distance(self.pos_x, self.pos_y, EVENTS[5.0].pos_x, EVENTS[5.0].pos_y)
+        if distance > 70:
+            return
 
         if EVENTS_IS_ONLINE[message.message_id] is True and self._voted_messages[message.message_id] is not True:
             message.set_authentic_event(actual_time_step)

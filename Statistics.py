@@ -42,7 +42,7 @@ def get_awared_vehicles_non_active_domain(vehicles, domain):
 
         if in_domain(vehicle, domain) is True \
                 and domain.id in vehicle.get_messages() \
-                and vehicle.get_messages()[domain.id].lifetime == 0.0:
+                and vehicle.get_messages()[domain.id].get_authentic_event() < vehicle.get_messages()[domain.id].get_non_authentic_event():
             total_aware_vehicles_in_domain += 1
 
     if total_active_vehicles_in_domain != 0:
