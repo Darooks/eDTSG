@@ -84,9 +84,9 @@ def draw_random_events():
             num_events -= 1
 
 
-def send_message(destination_vehicle, message):
+def send_message(destination_vehicle, message, actual_time_step):
     destination_vehicle.bufor[message.message_id] = message  # send message
-    destination_vehicle.collect_messages()                   # destination node get the message
+    destination_vehicle.collect_messages(actual_time_step)                   # destination node get the message
 
 
 def accident_node_dissemination(vehicles, actual_time_step):
@@ -106,7 +106,7 @@ def accident_node_dissemination(vehicles, actual_time_step):
                 and EVENTS_IS_ONLINE[accidental_vehicle.id] is True:
             # print("EVENT no longer exist")
             message_info.lifetime = 0.0
-            message_info.version_time_stamp = actual_time_step
+            message_info.version_time_stamp += actual_time_step
             EVENTS_IS_ONLINE[accidental_vehicle.id] = False
 
         for source_vehicle in vehicles.values():
@@ -122,7 +122,7 @@ def accident_node_dissemination(vehicles, actual_time_step):
                                   vehicle_type=source_vehicle_type,
                                   version_time_stamp=message_info.version_time_stamp)
 
-                send_message(source_vehicle, message)
+                send_message(source_vehicle, message, actual_time_step)
                 # print("Sending message. \n\tSource id:", accidental_vehicle.id, "lane:", accidental_vehicle.lane,
                 #       "\n\tDestination id:", source_vehicle.id, "lane:", source_vehicle.lane)
 
@@ -131,6 +131,7 @@ def simulate():
     previous_step = None
     for time_step in TIME_STEPS:
         print("Time step:", time_step)
+        ACTUAL_TIME_STAMP = time_step
         # Update vehicles states- merging states between actual step with previous step
         vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
         if previous_step is not None:
@@ -146,7 +147,7 @@ def simulate():
         for vehicle in vehicles.values():
             # TODO: 2) Send and collect the messages
             if vehicle.is_messages_dict_empty() is False:
-                vehicle.send_messages(vehicles.values())
+                vehicle.send_messages(vehicles.values(), time_step)
             pass
 
         if len(DOMAINS) != 0:

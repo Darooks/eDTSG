@@ -1,5 +1,6 @@
 from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, VehicleType, check_vehicle_type, \
-    MAX_HELPING_VEHICLE_DESTINATION, MAX_INTEDED_VEHICLE_DESTINATION, in_domain, in_extra_region, Phase
+    MAX_HELPING_VEHICLE_DESTINATION, MAX_INTEDED_VEHICLE_DESTINATION, in_domain, in_extra_region, Phase,\
+    EVENTS_IS_ONLINE
 from Message import Message
 
 TO_DROP = "DROPPED"
@@ -25,6 +26,7 @@ class Vehicle:
         self.bufor                      = {}  # id_domain/id_message: message
         self._messages                  = {}  # id_domain/id_message: message
         self._extra_region_distance_per_message  = {}  # id_domain/id_message: extra_length
+        self._voted_messages            = {}  # message_id : true/false (I voted true / I voted false)
 
     # *************
     # * GETS/SETS *
@@ -138,7 +140,18 @@ class Vehicle:
                 # print("Vehicle", self.id, "dropping message")
                 del self._messages[message_id]
 
-    def send_messages(self, dest_vehicles):
+    def check_and_vote_authenticity(self, message, actual_time_step):
+        if message.message_id not in self._voted_messages:
+            self._voted_messages[message.message_id] = None
+
+        if EVENTS_IS_ONLINE[message.message_id] is True and self._voted_messages[message.message_id] is not True:
+            message.set_authentic_event(actual_time_step)
+            self._voted_messages[message.message_id] = True
+        elif EVENTS_IS_ONLINE[message.message_id] is False and self._voted_messages[message.message_id] is not False:
+            message.set_non_authentic_event(actual_time_step)
+            self._voted_messages[message.message_id] = False
+
+    def send_messages(self, dest_vehicles, actual_time_step):
         for dest_vehicle in dest_vehicles:
             if dest_vehicle.id is self.id:
                 continue
@@ -162,7 +175,9 @@ class Vehicle:
                                           event_time_stamp=message.event_time_stamp,
                                           update_sequence=message.update_sequence.copy(),
                                           vehicle_type=destination_vehicle_type,
-                                          version_time_stamp=message.version_time_stamp)
+                                          version_time_stamp=message.version_time_stamp,
+                                          authentic_event=message.get_authentic_event(),
+                                          non_authentic_event=message.get_non_authentic_event())
                     dest_vehicle.bufor[message.message_id] = new_message
 
                     # Message is sent - update counters
@@ -172,27 +187,22 @@ class Vehicle:
                         message.increment_intended_vehicle_counter()
 
                 # at the end - destination vehicle must collect the message
-                dest_vehicle.collect_messages()
+                dest_vehicle.collect_messages(actual_time_step)
 
-    def collect_messages(self):
+    def collect_messages(self, actual_time_step):
         for id_message in self.bufor:
-            if id_message not in self._messages:
+            if (id_message not in self._messages) \
+                    or (id_message in self._messages
+                        and self._messages[id_message].version_time_stamp < self.bufor[id_message].version_time_stamp):
+                """ Collect the message if:
+                    1. I don't have the message at all
+                    2. I have it but there is newer version of it"""
                 self._messages[id_message] = self.bufor[id_message]
                 self._messages[id_message].update_sequence.append(self.id)
 
                 vehicle_density = DOMAINS[id_message].vehicle_density
                 self._extra_region_distance_per_message[id_message] = DOMAIN_RANGE / vehicle_density
-            elif id_message in self._messages \
-                    and self._messages[id_message].version_time_stamp < self.bufor[id_message].version_time_stamp:
-                """ Destination vehicle has the message but source vehicle's message is newer by version time stamp """
-                self._messages[id_message] = self.bufor[id_message]
-                self._messages[id_message].update_sequence.append(self.id)
-
-                vehicle_density = DOMAINS[id_message].vehicle_density
-                self._extra_region_distance_per_message[id_message] = DOMAIN_RANGE / vehicle_density
-
-                # print("Vehicle:", self.id, "updates info")
-                # TODO: Compute messages when they came to an end
+                self.check_and_vote_authenticity(self._messages[id_message], actual_time_step)
             else:
                 pass
 

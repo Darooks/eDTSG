@@ -11,7 +11,9 @@ class Message:
                  spread_and_assurance_lifetime=0,
                  update_sequence=None,
                  vehicle_type=None,
-                 version_time_stamp=None):
+                 version_time_stamp=None,
+                 authentic_event=None,
+                 non_authentic_event=None):
         self.message_id                      = message_id
         self.event_location                  = event_location
         self.lifetime                        = lifetime
@@ -25,14 +27,22 @@ class Message:
 
         self._intended_vehicle_counter       = 0
         self._helping_vehicle_counted        = 0
-        self._authentic_event                = None  # My modification
-        self._non_authentic_event            = None  # My modification
+        self._authentic_event                = 0 if authentic_event is None else authentic_event
+        self._non_authentic_event            = 0 if non_authentic_event is None else non_authentic_event
 
-    def set_authentic_event(self):
-        pass
+    def get_authentic_event(self):
+        return self._authentic_event
 
-    def set_non_authentic_event(self):
-        pass
+    def set_authentic_event(self, time_stamp):
+        self._authentic_event += time_stamp
+        self.version_time_stamp += time_stamp
+
+    def get_non_authentic_event(self):
+        return self._non_authentic_event
+
+    def set_non_authentic_event(self, time_stamp):
+        self._non_authentic_event += time_stamp
+        self.version_time_stamp += time_stamp
 
     def get_intended_vehicle_counter(self):
         return self._intended_vehicle_counter
