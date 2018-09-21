@@ -88,7 +88,7 @@ class Vehicle:
                                                    self._extra_region_distance_per_message[message.message_id])
             if in_extra_region_flag is True:
                 DOMAINS[message.message_id].phase = Phase.STABLE
-                print("Domain gets STABLE state")
+                # print("Domain gets STABLE state")
 
     def _drop_message(self, message):
         # print("I am vehicle nr", self.id, "[DROPPING THE MESSAGE]")

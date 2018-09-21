@@ -47,10 +47,11 @@ def get_awared_vehicles_non_active_domain(vehicles, domain, output_file, actual_
 
     if total_active_vehicles_in_domain != 0:
         total_awareness = 100 * total_aware_vehicles_in_domain / total_active_vehicles_in_domain
-        print("[N] Total awared vehicles:", total_awareness, "%")
-        print("\n")
-        string_to_write = str(actual_time_step - 35.0) + "\t" + str(total_awareness) + "%\n"
+        # print("[N] Total awared vehicles:", total_awareness, "%")
+        # print("\n")
+        string_to_write = str(actual_time_step - 35.0) + "\t" + str(total_awareness) + "%"
         output_file.write(string_to_write)
+        print(string_to_write)
     else:
         print("There are no active vehicles")
 
@@ -59,7 +60,7 @@ def get_statistics(actual_time_step, vehicles, output_file):
     for domain in DOMAINS.values():
         if actual_time_step < domain.start_time:
             continue
-        print("\tDomain", domain.id, "\n\tStart time:", domain.start_time, "\n\tlane:", domain.lane, "\n\tcontains:")
+        # print("\tDomain", domain.id, "\n\tStart time:", domain.start_time, "\n\tlane:", domain.lane, "\n\tcontains:")
 
         # get_awared_vehicles(vehicles, domain)
         if EVENTS_IS_ONLINE[domain.id] is False:
