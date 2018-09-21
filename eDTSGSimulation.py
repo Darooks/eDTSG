@@ -130,7 +130,7 @@ def accident_node_dissemination(vehicles, actual_time_step):
 def simulate(output_file):
     previous_step = None
     for time_step in TIME_STEPS:
-        print("Time step:", time_step)
+        # print("Time step:", time_step)
         # Update vehicles states- merging states between actual step with previous step
         vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
         if previous_step is not None:
