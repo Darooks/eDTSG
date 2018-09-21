@@ -1,6 +1,8 @@
 from math import *
 from enum import Enum
+from StatisticMemory import StatisticMemory
 
+COGNITIVE_DISTANCE = 70
 COMMUNICATION_RANGE = 50  # range of communication [m] (250)
 DOMAIN_RANGE = 500  # range of domain [m]
 DOMAIN_DURATION = 30  # duration of domain [s]
@@ -13,6 +15,7 @@ MAX_HELPING_VEHICLE_DESTINATION = 3  # how many helping vehicles should take the
 EVENTS = {}  # time: accidental_vehicle
 EVENTS_IS_ONLINE = {}  # accidental_vehicle_id: true/false (is active / is not active)
 DOMAINS = {}  # accidental_veh_id: Domain
+STATISTIC_MEMORY_OBJECT = StatisticMemory()
 
 
 class VehicleType(Enum):

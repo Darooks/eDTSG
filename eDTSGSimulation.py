@@ -10,7 +10,7 @@ import random
 TIME_STEPS = sumo_upload('fcd_output.xml')
 
 
-def update_vehicles_states(actual_vehicles, previous_step):
+def update_vehicles_states(actual_vehicles, previous_step, actual_time_step):
     previous_vehicles = TIME_STEPS[previous_step]
 
     for vehicle_id in previous_vehicles:
@@ -22,7 +22,7 @@ def update_vehicles_states(actual_vehicles, previous_step):
                 previous_vehicles[vehicle_id].get_extra_length_per_message()
             )
 
-            actual_vehicles[vehicle_id].update_messages_statuses()
+            actual_vehicles[vehicle_id].update_messages_statuses(actual_time_step)
 
     return actual_vehicles
 
@@ -134,7 +134,7 @@ def simulate(output_file):
         # Update vehicles states- merging states between actual step with previous step
         vehicles = TIME_STEPS[time_step]  # get vehicles from current time step
         if previous_step is not None:
-            vehicles = update_vehicles_states(vehicles, previous_step)  # merge states
+            vehicles = update_vehicles_states(vehicles, previous_step, time_step)  # merge states
 
         # Update domains
         for domain in DOMAINS.values():
@@ -146,6 +146,7 @@ def simulate(output_file):
         for vehicle in vehicles.values():
             # TODO: 2) Send and collect the messages
             if vehicle.is_messages_dict_empty() is False:
+                # vehicle.update_messages_statuses(time_step)
                 vehicle.send_messages(vehicles.values(), time_step)
             pass
 
@@ -160,7 +161,7 @@ def main():
     output_file = open("output_file.txt", "w")
     create_events()
     simulate(output_file)
-    pass
+    return STATISTIC_MEMORY_OBJECT.time_to_get_90_per, STATISTIC_MEMORY_OBJECT.time_to_get_100_per
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from Utils import get_distance, COMMUNICATION_RANGE, DOMAINS, DOMAIN_RANGE, VehicleType, check_vehicle_type, \
     MAX_HELPING_VEHICLE_DESTINATION, MAX_INTEDED_VEHICLE_DESTINATION, in_domain, in_extra_region, Phase,\
-    EVENTS_IS_ONLINE, EVENTS
+    EVENTS_IS_ONLINE, EVENTS, COGNITIVE_DISTANCE
 from Message import Message
 
 TO_DROP = "DROPPED"
@@ -117,7 +117,7 @@ class Vehicle:
             if message.get_helping_vehicle_counter() >= MAX_HELPING_VEHICLE_DESTINATION and in_domain_flag is False:
                 self._drop_message(message)
 
-    def update_messages_statuses(self):
+    def update_messages_statuses(self, actual_time_step):
         """ Decide to drop or keep the messages or to make them asleep. Decision should be made in every time step.
 
             For fast implementation of source vehicle decisions you can set:
@@ -126,6 +126,8 @@ class Vehicle:
         """
         for message in self._messages.values():
             domain_phase = DOMAINS[message.message_id].phase
+
+            self.check_and_vote_authenticity(message, actual_time_step)
 
             if domain_phase is Phase.PRE_STABLE:
                 # print("I am vehicle nr", self.id, "[PRE-STABLE functionality]")
@@ -146,7 +148,7 @@ class Vehicle:
 
         # TODO: Check if vehicle is close enough to decide whether event is true or not
         distance = get_distance(self.pos_x, self.pos_y, EVENTS[5.0].pos_x, EVENTS[5.0].pos_y)
-        if distance > 70:
+        if distance > COGNITIVE_DISTANCE:
             return
 
         if EVENTS_IS_ONLINE[message.message_id] is True and self._voted_messages[message.message_id] is not True:

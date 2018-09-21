@@ -1,4 +1,4 @@
-from Utils import VehicleType
+from Utils import VehicleType, STATISTIC_MEMORY_OBJECT
 
 
 class Message:
@@ -36,6 +36,7 @@ class Message:
     def set_authentic_event(self, time_stamp):
         self._authentic_event += time_stamp
         self.version_time_stamp += time_stamp
+        STATISTIC_MEMORY_OBJECT.set_voted_yes()
 
     def get_non_authentic_event(self):
         return self._non_authentic_event
@@ -43,6 +44,7 @@ class Message:
     def set_non_authentic_event(self, time_stamp):
         self._non_authentic_event += time_stamp
         self.version_time_stamp += time_stamp
+        STATISTIC_MEMORY_OBJECT.set_voted_no()
 
     def get_intended_vehicle_counter(self):
         return self._intended_vehicle_counter
